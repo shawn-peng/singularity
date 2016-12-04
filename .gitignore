@@ -1,0 +1,13 @@
+
+#temporary
+*.swp
+*~
+
+#objs
+*.o
+
+#targets
+
+#build
+/build
+
