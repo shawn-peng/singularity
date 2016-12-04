@@ -1,0 +1,3 @@
+[submodule "dependencies/waylandpp"]
+	path = dependencies/waylandpp
+	url = https://github.com/shawn-peng/waylandpp
