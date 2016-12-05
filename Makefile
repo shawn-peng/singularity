@@ -1,7 +1,7 @@
 #CFLAGS=
 #CXXFLAGS= -I
 
-OPTS= -fpermissive
+OPTS= -fpermissive -std=c++11
 INCLUDES= -I/usr/local/include/
 
 LIBPATHS= -L/usr/local/lib
