@@ -2,7 +2,7 @@
 #CXXFLAGS= -I
 
 OPTS= -fpermissive -std=c++11
-INCLUDES= -I/usr/local/include/
+INCLUDES= -I/usr/local/include/ -Idependencies/waylandpp/include/
 
 LIBPATHS= -L/usr/local/lib
 LIBS= -lm -lwayland-client -lwayland-egl -lwayland-cursor -lEGL -lGL -lwld -lswc
