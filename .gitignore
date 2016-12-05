@@ -14,3 +14,9 @@
 #tags
 tags
 
+singularity.config
+singularity.creator
+singularity.creator.user
+singularity.files
+singularity.includes
+
