@@ -1,8 +1,19 @@
 #CFLAGS=
 #CXXFLAGS= -I
-LDFLAGS= -L/usr/local/lib -lm -lwayland-client -lwayland-egl -lwayland-cursor -lEGL -lGL -lwld -lswc
 
-CXXFLAGS=-I/usr/local/include/ -fpermissive
+OPTS= -fpermissive
+INCLUDES= -I/usr/local/include/
+
+LIBPATHS= -L/usr/local/lib
+LIBS= -lm -lwayland-client -lwayland-egl -lwayland-cursor -lEGL -lGL -lwld -lswc
+
+MACROS=
+
+LDFLAGS= $(LIBPATHS) $(LIBS)
+
+CFLAGS= $(OPTS) $(INCLUDES)
+CXXFLAGS= $(OPTS) $(INCLUDES)
+
 BINARIES=void
 
 BUILDDIR=./build/
