@@ -1,50 +1,58 @@
-#CFLAGS=
-#CXXFLAGS= -I
 
-OPTS= -fpermissive -std=c++11
-INCLUDES= -I/usr/local/include/ -Idependencies/waylandpp/include/
+include defs.mk
+include functions.mk
+include rules.mk
 
-LIBPATHS= -L/usr/local/lib
-LIBS= -lm -lwayland-client -lwayland-egl -lwayland-cursor -lEGL -lGL -lwld -lswc
+export PROJDIR= $(abspath .)/
+export ALL_TARGETS
 
-MACROS=
+#TARGETS=client server
 
-LDFLAGS= $(LIBPATHS) $(LIBS)
+SOURCES:= $(shell find $(SRCDIR) -name '*.cpp')
 
-CFLAGS= $(OPTS) $(INCLUDES)
-CXXFLAGS= $(OPTS) $(INCLUDES)
+SUBDIRS:= $(shell ls -d */)
 
-BINARIES=void
+.PHONY: all clean subdirs info
 
-BUILDDIR=./build/
-BINDIR=$(BUILDDIR)bin/
-OBJDIR=$(BUILDDIR)obj/
-SRCDIR=./src/
+all: subdirs info $(ALL_TARGETS)#$(ALL_TAGETS)#$(addprefix $(BINDIR), $(BINARIES))
 
-SOURCES := $(shell find $(SRCDIR) -name '*.cpp')
+info: subdirs
+	$(eval $(call print_vars,ALL_TARGETS))
 
-all: $(addprefix $(BINDIR), $(BINARIES))
-
+#-rm build/* -rf
 clean: 
-	 -rm build/* -rf
+	-rm $(BINDIR)* -rf
+	-rm $(LIBDIR)* -rf
+	-rm $(OBJDIR)* -rf
+
+#$(eval $(foreach d,$(SUBDIRS),make -C $(d);))
+
+.PHONY: src scanner protocols example
+subdirs: src scanner protocols example
+#	make -C src -f src/Makefile $*
+#	make -C src/ $*
+
+src: scanner protocols
+
+protocols: scanner
+
+example: protocols
+
+src scanner protocols example:
+	make -C $@ $*
 
 #$(BINDIR)%: 
-define make_target
-
-$1_SOURCES:=$(shell find $(SRCDIR)$1/ -name '*.cpp')
-$1_OBJECTS:=$$($1_SOURCES:$(SRCDIR)%.cpp=$(OBJDIR)%.o)
-$(BINDIR)$1: $$($1_OBJECTS)
-	@mkdir -p $(BINDIR)
-	$(CXX) -o $(BINDIR)$1 $$($1_OBJECTS) $(LDFLAGS)
-
-endef
 
 $(foreach target,$(BINARIES),$(eval $(call make_target,$(target))))
 
-$(OBJDIR)%.o: $(SRCDIR)%.cpp
-	mkdir -p $(dir $@)
-	$(CXX) -c $< $(CXXFLAGS) -o $@
+%:
+	make -f $@.mk $*
 
+VAR/TEST/A=This is a var test
+
+test:
+	$(info $(VAR/TEST/A))
+	@echo
 
 depend:
 	 makedepend *.cpp
