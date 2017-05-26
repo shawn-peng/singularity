@@ -14,7 +14,10 @@ SUBDIRS:= $(shell ls -d */)
 
 .PHONY: all clean subdirs info
 
-all: subdirs info $(ALL_TARGETS)#$(ALL_TAGETS)#$(addprefix $(BINDIR), $(BINARIES))
+#all: subdirs info $(ALL_TARGETS)
+all: src
+
+#$(ALL_TAGETS)#$(addprefix $(BINDIR), $(BINARIES))
 
 info: subdirs
 	$(eval $(call print_vars,ALL_TARGETS))
@@ -27,18 +30,18 @@ clean:
 
 #$(eval $(foreach d,$(SUBDIRS),make -C $(d);))
 
-.PHONY: src scanner protocols example
-subdirs: src scanner protocols example
+.PHONY: src
+#subdirs: src scanner protocols example
 #	make -C src -f src/Makefile $*
 #	make -C src/ $*
 
-src: scanner protocols
+src:
 
 protocols: scanner
 
 example: protocols
 
-src scanner protocols example:
+src:
 	make -C $@ $*
 
 #$(BINDIR)%: 

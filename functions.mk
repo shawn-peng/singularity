@@ -22,7 +22,7 @@ $(BINDIR)$1: $$($1_OBJECTS)
 endef
 
 define make_sharedlib
-ALL_TARGETS=$(ALL_TARGETS) $(LIBDIR)lib$1
+ALL_TARGETS=$(ALL_TARGETS) $(LIBDIR)$1
 $1_SOURCES:=$$(abspath $2)
 $1_OBJECTS:=$$($1_SOURCES:$(PROJDIR)%.cpp=$(OBJDIR)%.o)
 $1_OBJECTS:=$$($1_OBJECTS:$(PROJDIR)%.c=$(OBJDIR)%.o)

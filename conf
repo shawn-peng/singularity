@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#WESTON_LIB="/home/shawn/singularity-workspace/weston/install/lib/"
+
+WLPP_LIB=`pwd`/dependencies/waylandpp/build/lib
+
+export LD_LIBRARY_PATH
+LD_LIBRARY_PATH+="`pwd`/build/lib;${WLPP_LIB}"
+export WAYLAND_DISPLAY="void"
+#export WAYLAND_DISPLAY="wayland-0"
+
