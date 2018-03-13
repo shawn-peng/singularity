@@ -288,6 +288,19 @@ void void_shell_surface::bind(shell_surface_resource_t surf) {
 	};
 }
 
+void void_data_device_manager::bind(resource_t res, void *data) {
+	std::cout << "client bind void_data_device_manager" << std::endl;
+
+	auto r = new data_device_manager_resource_t(res);
+
+	r->on_get_data_device() = [&](data_device_resource_t res,
+			seat_resource_t seat) {
+		auto p = new void_data_device(compositor);
+		p->bind(res);
+		p->bind_seat(seat);
+	};
+}
+
 void void_seat::bind(resource_t res, void *data) {
 	std::cout << "client bind void_seat" << std::endl;
 	res_list.push_back(res);
@@ -323,10 +336,36 @@ bool void_surface::bind_view(void_view *v) {
 	return true;
 }
 
+void void_zxdg_shell_v6::bind(resource_t res, void *data) {
+	std::cout << "client bind void_zxdg_shell_v6" << std::endl;
+
+	auto r = new zxdg_shell_v6_resource_t(res);
+
+	r->on_get_xdg_surface() = [&](zxdg_surface_v6_resource_t res,
+			surface_resource_t surf) {
+		auto p = new void_zxdg_surface_v6(compositor);
+		p->bind(res);
+		p->bind_surface(surf);
+	};
+}
+
+void void_zxdg_surface_v6::bind(zxdg_surface_v6_resource_t res) {
+	resource = res;
+
+	res.on_get_toplevel() = [&](zxdg_toplevel_v6_resource_t top_res) {
+		auto p = new void_zxdg_toplevel_v6(compositor);
+		p->bind(top_res);
+	};
+}
+
 void_compositor::void_compositor(display_server_t disp)
 	: global_t(disp, compositor_interface, 4, this, NULL),
 	display(disp),
-	shell(disp, this), seat(disp, this), shm(disp),
+	shm(disp),
+	shell(disp, this),
+	data_device_manager(disp, this),
+	seat(disp, this),
+	output(disp, this),
 	xdg_shell(disp, this),
 	session_active(true),
 	focus(NULL), surface_grabbing(false),

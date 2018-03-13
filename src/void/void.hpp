@@ -123,7 +123,27 @@ public:
 };
 
 class void_pointer;
+class void_keyboard;
 class void_seat;
+
+class void_keyboard {
+private:
+	void_seat *seat;
+	wayland::client_t *client;
+	wayland::keyboard_resource_t resource;
+
+	//std::unordered_map<
+
+public:
+	void_keyboard(void_seat *seat)
+		: seat(seat)
+	{
+	}
+	void bind(wayland::keyboard_resource_t res) {
+		resource = res;
+	}
+
+};
 
 class void_pointer {
 private:
@@ -153,12 +173,50 @@ public:
 
 };
 
+class void_data_device;
+
+class void_data_device_manager : public wayland::global_t {
+private:
+	wayland::display_server_t display;
+	void_compositor *compositor;
+
+public:
+	void_data_device_manager(wayland::display_server_t disp, void_compositor *comp)
+		: global_t(disp, wayland::detail::data_device_manager_interface, 1, this, NULL),
+		display(disp), compositor(comp)
+	{
+	}
+
+	virtual void bind(wayland::resource_t res, void *data);
+};
+
+class void_data_device {
+private:
+	wayland::data_device_resource_t resource;
+	void_compositor *compositor;
+	wayland::seat_resource_t seat_res;
+
+public:
+	void_data_device(void_compositor *c)
+		: compositor(c)
+	{
+	}
+
+	void bind(wayland::data_device_resource_t res) {
+		resource = res;
+	}
+
+	void bind_seat(wayland::seat_resource_t seat) {
+		seat_res = seat;
+	}
+};
+
 class void_view {
 private:
 	void_surface *surface;
-	void_pointer *pointer;
 	int32_t x, y;
 	int32_t width, height;
+	void_pointer *pointer;
 	pixman_region32_t bounding_box;
 
 public:
@@ -253,6 +311,43 @@ public:
 	}
 };
 
+class void_zxdg_surface_v6 {
+private:
+	wayland::zxdg_surface_v6_resource_t resource;
+	void_compositor *compositor;
+	wayland::surface_resource_t surf_res;
+	bool surface_grabbing;
+
+public:
+	void_zxdg_surface_v6(void_compositor *c)
+		: compositor(c),
+		surface_grabbing(false)
+	{
+	}
+
+	void bind(wayland::zxdg_surface_v6_resource_t surf);
+
+	void bind_surface(wayland::surface_resource_t surf) {
+		surf_res = surf;
+	}
+};
+
+class void_zxdg_toplevel_v6 {
+private:
+	wayland::zxdg_toplevel_v6_resource_t resource;
+	void_compositor *compositor;
+
+public:
+	void_zxdg_toplevel_v6(void_compositor *c)
+		: compositor(c)
+	{
+	}
+
+	void bind(wayland::zxdg_toplevel_v6_resource_t res) {
+		resource = res;
+	}
+};
+
 /**
  * 		GLOBALS
  */
@@ -315,13 +410,34 @@ public:
 	virtual void bind(wayland::resource_t res, void *data);
 };
 
-class void_xdg_shell_v6 : public wayland::global_t {
+class void_output : public wayland::global_t {
 private:
 	wayland::display_server_t display;
 	void_compositor *compositor;
 
 public:
-	void_xdg_shell_v6(wayland::display_server_t disp,
+	void_output(wayland::display_server_t disp,
+			void_compositor *c)
+		: global_t(disp, wayland::detail::output_interface, 1, this, NULL),
+		display(disp),
+		compositor(c)
+	{
+	}
+
+	virtual void bind(wayland::resource_t res, void *data) {
+		std::cout << "client bind void_zxdg_shell_v6" << std::endl;
+
+		auto r = new wayland::output_resource_t(res);
+	}
+};
+
+class void_zxdg_shell_v6 : public wayland::global_t {
+private:
+	wayland::display_server_t display;
+	void_compositor *compositor;
+
+public:
+	void_zxdg_shell_v6(wayland::display_server_t disp,
 			void_compositor *c)
 		: global_t(disp, wayland::detail::zxdg_shell_v6_interface, 1, this, NULL),
 		display(disp),
@@ -329,9 +445,7 @@ public:
 	{
 	}
 
-	virtual void bind(wayland::resource_t res, void *data) {
-		std::cout << "client bind void_xdg_shell_v6" << std::endl;
-	}
+	virtual void bind(wayland::resource_t res, void *data);
 };
 
 class void_compositor : public wayland::global_t {
@@ -340,11 +454,14 @@ private:
 
 	display_wrapper_t wrapper;
 
-	void_shell shell;
-	void_seat seat;
 	wayland::shm_t shm;
 
-	void_xdg_shell_v6 xdg_shell;
+	void_shell shell;
+	void_data_device_manager data_device_manager;
+	void_seat seat;
+	void_output output;
+
+	void_zxdg_shell_v6 xdg_shell;
 
 	gl_shader *shader;
 
