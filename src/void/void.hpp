@@ -115,6 +115,9 @@ public:
 	//void attach() {
 	//}
 
+	int get_width() { return width; }
+	int get_height() { return height; }
+
 	void commit_state();
 
 	wayland::shm_buffer_t *get_buffer();
@@ -315,7 +318,7 @@ class void_zxdg_surface_v6 {
 private:
 	wayland::zxdg_surface_v6_resource_t resource;
 	void_compositor *compositor;
-	wayland::surface_resource_t surf_res;
+	void_surface *wlsurf;
 	bool surface_grabbing;
 
 public:
@@ -327,8 +330,9 @@ public:
 
 	void bind(wayland::zxdg_surface_v6_resource_t surf);
 
-	void bind_surface(wayland::surface_resource_t surf) {
-		surf_res = surf;
+	void bind_wlsurface(wayland::surface_resource_t wlsurf_res) {
+		//wlsurf_res = surf;
+		wlsurf = (void_surface *)wlsurf_res.get_user_data();
 	}
 };
 
@@ -336,6 +340,11 @@ class void_zxdg_toplevel_v6 {
 private:
 	wayland::zxdg_toplevel_v6_resource_t resource;
 	void_compositor *compositor;
+	void_zxdg_surface_v6 *surface;
+	std::list<void_zxdg_toplevel_v6 *> children;
+	std::string title;
+	bool maximized;
+	std::string appid;
 
 public:
 	void_zxdg_toplevel_v6(void_compositor *c)
@@ -343,8 +352,9 @@ public:
 	{
 	}
 
-	void bind(wayland::zxdg_toplevel_v6_resource_t res) {
-		resource = res;
+	void bind(wayland::zxdg_toplevel_v6_resource_t res);
+	void bind_surface(wayland::zxdg_surface_v6_resource_t surf_res) {
+		surface = (void_zxdg_surface_v6 *)surf_res.get_user_data();
 	}
 };
 
@@ -425,7 +435,7 @@ public:
 	}
 
 	virtual void bind(wayland::resource_t res, void *data) {
-		std::cout << "client bind void_zxdg_shell_v6" << std::endl;
+		std::cout << "client bind void_output" << std::endl;
 
 		auto r = new wayland::output_resource_t(res);
 	}
@@ -584,7 +594,9 @@ public:
 	//}
 
 
-	int get_width();
+	int get_width() {
+		return wrapper.get_width();
+	}
 
 	int get_height() {
 		return wrapper.get_height();

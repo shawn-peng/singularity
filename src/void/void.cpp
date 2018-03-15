@@ -342,10 +342,10 @@ void void_zxdg_shell_v6::bind(resource_t res, void *data) {
 	auto r = new zxdg_shell_v6_resource_t(res);
 
 	r->on_get_xdg_surface() = [&](zxdg_surface_v6_resource_t res,
-			surface_resource_t surf) {
+			surface_resource_t wlsurf_res) {
 		auto p = new void_zxdg_surface_v6(compositor);
 		p->bind(res);
-		p->bind_surface(surf);
+		p->bind_wlsurface(wlsurf_res);
 	};
 }
 
@@ -355,6 +355,43 @@ void void_zxdg_surface_v6::bind(zxdg_surface_v6_resource_t res) {
 	res.on_get_toplevel() = [&](zxdg_toplevel_v6_resource_t top_res) {
 		auto p = new void_zxdg_toplevel_v6(compositor);
 		p->bind(top_res);
+		p->bind_surface(res);
+	};
+}
+
+void void_zxdg_toplevel_v6::bind(zxdg_toplevel_v6_resource_t res) {
+	resource = res;
+	res.set_user_data(this);
+
+	res.on_set_parent() = [&](zxdg_toplevel_v6_resource_t parent_res) {
+		if (!parent_res) {
+			return;
+		}
+
+		// add reference to parent
+		auto parent_toplevel = (void_zxdg_toplevel_v6 *)parent_res.get_user_data();
+		parent_toplevel->children.push_back(this);
+	};
+
+	res.on_set_title() = [&](std::string title) {
+		cout << "setting title: " << title << endl;
+		this->title = title;
+	};
+
+	res.on_set_app_id() = [&](std::string appid) {
+		cout << "setting appid: " << appid << endl;
+		this->appid = appid;
+	};
+
+	res.on_set_maximized() = [&]() {
+		this->maximized = true;
+		int w, h;
+		w = compositor->get_width();
+		h = compositor->get_height();
+		
+		cout << "setting maximized (" << w << ", " << h << ")" << endl;
+		array_t states{zxdg_toplevel_v6_state::maximized};
+		resource.send_configure(w, h, states);
 	};
 }
 

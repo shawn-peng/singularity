@@ -6,7 +6,7 @@ include $(PROJDIR)rules.mk
 
 #TARGET = void
 
-LIBS = wayland-server++ pixman-1 input dl EGL wayland-client++ wayland-egl++ wayland-cursor++ wayland-shm++ xdg_shell_unstable_v6-server++ GLESv2 #wayland-server
+LIBS = wayland-server++ pixman-1 input dl EGL wayland-client++ wayland-egl++ wayland-cursor++ wayland-shm++ xdg_shell_unstable_v6-server++ GLESv2 wayland-server
 
 LDFLAGS += -Wl,-E
 
