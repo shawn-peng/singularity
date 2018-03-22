@@ -12,6 +12,7 @@ LDFLAGS += -Wl,-E
 
 SRCS = \
 	   void.cpp \
+	   void_xdg.cpp \
 	   wrapper.cpp \
 
 

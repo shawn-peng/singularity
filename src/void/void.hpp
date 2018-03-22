@@ -1,4 +1,4 @@
-/* compositor.hpp
+/* void.hpp
  *
  * Copyright (c) 2016-2017 Yisu Peng
  *
@@ -42,6 +42,7 @@
 #include <pixman-1/pixman.h>
 
 #include "wrapper.hpp"
+#include "void_xdg.hpp"
 
 class void_compositor;
 class void_view;
@@ -163,6 +164,11 @@ public:
 	}
 	void bind(wayland::pointer_resource_t res) {
 		resource = res;
+
+		res.on_release() = [&]() {
+			cout << "client released pointer." << endl;
+			delete this;
+		};
 	}
 
 	void notify_motion(uint32_t time, int x, int y) {
@@ -314,50 +320,6 @@ public:
 	}
 };
 
-class void_zxdg_surface_v6 {
-private:
-	wayland::zxdg_surface_v6_resource_t resource;
-	void_compositor *compositor;
-	void_surface *wlsurf;
-	bool surface_grabbing;
-
-public:
-	void_zxdg_surface_v6(void_compositor *c)
-		: compositor(c),
-		surface_grabbing(false)
-	{
-	}
-
-	void bind(wayland::zxdg_surface_v6_resource_t surf);
-
-	void bind_wlsurface(wayland::surface_resource_t wlsurf_res) {
-		//wlsurf_res = surf;
-		wlsurf = (void_surface *)wlsurf_res.get_user_data();
-	}
-};
-
-class void_zxdg_toplevel_v6 {
-private:
-	wayland::zxdg_toplevel_v6_resource_t resource;
-	void_compositor *compositor;
-	void_zxdg_surface_v6 *surface;
-	std::list<void_zxdg_toplevel_v6 *> children;
-	std::string title;
-	bool maximized;
-	std::string appid;
-
-public:
-	void_zxdg_toplevel_v6(void_compositor *c)
-		: compositor(c)
-	{
-	}
-
-	void bind(wayland::zxdg_toplevel_v6_resource_t res);
-	void bind_surface(wayland::zxdg_surface_v6_resource_t surf_res) {
-		surface = (void_zxdg_surface_v6 *)surf_res.get_user_data();
-	}
-};
-
 /**
  * 		GLOBALS
  */
@@ -439,23 +401,6 @@ public:
 
 		auto r = new wayland::output_resource_t(res);
 	}
-};
-
-class void_zxdg_shell_v6 : public wayland::global_t {
-private:
-	wayland::display_server_t display;
-	void_compositor *compositor;
-
-public:
-	void_zxdg_shell_v6(wayland::display_server_t disp,
-			void_compositor *c)
-		: global_t(disp, wayland::detail::zxdg_shell_v6_interface, 1, this, NULL),
-		display(disp),
-		compositor(c)
-	{
-	}
-
-	virtual void bind(wayland::resource_t res, void *data);
 };
 
 class void_compositor : public wayland::global_t {
